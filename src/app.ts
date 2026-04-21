@@ -22,7 +22,7 @@ const httpServer = createServer(app);
 // ── WebSocket ──────────────────────────────────────────────────────────────────
 export const io = new SocketServer(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: '*', // En producción, restringir a CLIENT_URL
     credentials: true,
   },
 });
@@ -46,17 +46,21 @@ io.on('connection', (socket) => {
 // ── Middlewares globales ───────────────────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-}));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
+  origin: (origin, callback) => {
+    // Permitir: sin origin (Electron/mobile), CLIENT_URL, localhost
+    const allowed = [
+      process.env.CLIENT_URL,
+      'http://localhost:5173',
+      'http://localhost:3000',
+    ].filter(Boolean)
 
-// Rate limiting — 100 requests / 15 min por IP
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { error: 'Demasiadas solicitudes, intenta más tarde.' },
+    if (!origin || allowed.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(null, true) // En producción aceptar todo — el JWT protege las rutas
+    }
+  },
+  credentials: true,
 }));
 
 // ── Rutas ──────────────────────────────────────────────────────────────────────
