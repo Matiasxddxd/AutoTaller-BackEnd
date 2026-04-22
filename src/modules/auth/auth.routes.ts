@@ -12,7 +12,7 @@ export const authRouter = Router();
 authRouter.post(
   '/login',
   [
-    body('email').isEmail().normalizeEmail().withMessage('Email inválido'),
+    body('email').isEmail().withMessage('Email inválido'),,
     body('password').isLength({ min: 6 }).withMessage('Contraseña mínimo 6 caracteres'),
     validateRequest,
   ],
