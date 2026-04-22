@@ -9,42 +9,38 @@ import { authMiddleware } from '../../middleware/auth';
 export const authRouter = Router();
 
 // ── POST /api/auth/login ──────────────────────────────────────────────────────
-authRouter.post(
-  '/login',
-  [
-    body('email').notEmpty().withMessage('Email requerido'),
-    body('password').isLength({ min: 6 }).withMessage('Contraseña mínimo 6 caracteres'),
-    validateRequest,
-  ],
-  async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
+authRouter.post('/login', async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
 
-      const { rows } = await db.query(
-        'SELECT * FROM users WHERE email = $1 AND activo = TRUE',
-        [email]
-      );
-      const user = rows[0];
-
-      if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-        throw new AppError('Credenciales incorrectas', 401);
-      }
-
-      const token = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role },
-        process.env.JWT_SECRET as string,
-        { expiresIn: '7d' } as any
-      );
-
-      res.json({
-        token,
-        user: { id: user.id, email: user.email, role: user.role },
-      });
-    } catch (err) {
-      next(err);
+    if (!email || !password) {
+      return res.status(422).json({ error: 'Email y contraseña requeridos' });
     }
+
+    const { rows } = await db.query(
+      'SELECT * FROM users WHERE email = $1 AND activo = TRUE',
+      [email]
+    );
+    const user = rows[0];
+
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      throw new AppError('Credenciales incorrectas', 401);
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '7d' } as any
+    );
+
+    res.json({
+      token,
+      user: { id: user.id, email: user.email, role: user.role },
+    });
+  } catch (err) {
+    next(err);
   }
-);
+});
 
 // ── POST /api/auth/register ───────────────────────────────────────────────────
 // Solo admins pueden crear usuarios (excepto primer registro)
