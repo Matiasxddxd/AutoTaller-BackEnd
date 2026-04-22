@@ -62,7 +62,15 @@ app.use(cors({
   },
   credentials: true,
 }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true }));
 
+// Rate limiting
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Demasiadas solicitudes, intenta más tarde.' },
+}));
 // ── Rutas ──────────────────────────────────────────────────────────────────────
 app.use('/api/auth',      authRouter);                        // Pública
 app.use('/api/clients',  authMiddleware, clientsRouter);     // Protegida
