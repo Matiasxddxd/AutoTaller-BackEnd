@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import { db } from '../../config/db';
 import { validateRequest, AppError } from '../../middleware/errorHandler';
+import { generateQuotePDF } from '../../utils/pdf';
 
 export const quotesRouter = Router();
 
@@ -121,7 +122,7 @@ quotesRouter.delete('/:id', async (req, res, next) => {
 // ── GET /api/quotes/:id/pdf ───────────────────────────────────────────────────
 quotesRouter.get('/:id/pdf', async (req, res, next) => {
   try {
-    const { generateQuotePdf } = await import('../../utils/pdf');
+    const { generateQuotePDF } = await import('../../utils/pdf');
     const { rows } = await db.query(`
       SELECT q.*, c.nombre AS cliente_nombre, c.email AS cliente_email,
              c.telefono AS cliente_telefono, c.rut AS cliente_rut,
@@ -139,7 +140,7 @@ quotesRouter.get('/:id/pdf', async (req, res, next) => {
       [req.params.id]
     );
 
-    const pdf = await generateQuotePdf({ ...rows[0], items });
+    const pdf = await generateQuotePDF({ ...rows[0], items });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=cotizacion-${req.params.id.slice(0,8)}.pdf`);
     res.send(pdf);
