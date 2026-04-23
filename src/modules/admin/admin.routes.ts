@@ -42,7 +42,7 @@ adminRouter.get('/dashboard', async (req, res, next) => {
         FROM cotizaciones
         WHERE estado = 'aprobada'
           AND EXTRACT(YEAR FROM created_at) = $2
-          AND EXTRACT(MONTH FROM created_at) <= $1
+          AND EXTRACT(MONTH FROM created_at) = $1
       `, [mes, anio, mes - 1 || 12, mes === 1 ? anio - 1 : anio]),
     ]);
 
