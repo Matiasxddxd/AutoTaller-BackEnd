@@ -29,7 +29,7 @@ adminRouter.get('/dashboard', async (req, res, next) => {
       db.query(`SELECT COUNT(*) AS total FROM clientes`),
 
       db.query(`
-        SELECT COUNT(*) FILTER (WHERE stock_actual <= stock_minimo) AS bajo_stock,
+        SELECT COUNT(*) FILTER (WHERE stock <= stock_minimo) AS bajo_stock,
                COUNT(*) AS total
         FROM repuestos
       `),
