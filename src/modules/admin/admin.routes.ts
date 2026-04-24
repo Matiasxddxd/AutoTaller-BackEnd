@@ -35,15 +35,15 @@ adminRouter.get('/dashboard', async (req, res, next) => {
       `),
 
       db.query(`
-        SELECT COALESCE(SUM(total), 0) AS mes_actual,
-               COALESCE(SUM(CASE WHEN EXTRACT(MONTH FROM created_at) = $3
-                                  AND EXTRACT(YEAR  FROM created_at) = $4
-                               THEN total END), 0) AS mes_anterior
+        SELECT 
+          COALESCE(SUM(total), 0) AS total_mes,
+          COALESCE(COUNT(*), 0) AS total_cotizaciones,
+          COALESCE(AVG(total), 0) AS promedio_orden
         FROM cotizaciones
-        WHERE estado = 'aprobada'
-          AND EXTRACT(YEAR FROM created_at) = $2
+          WHERE estado = 'aprobada'
           AND EXTRACT(MONTH FROM created_at) = $1
-      `, [mes, anio, mes - 1 || 12, mes === 1 ? anio - 1 : anio]),
+          AND EXTRACT(YEAR  FROM created_at) = $2
+          `, [mes, anio]),
     ]);
 
     res.json({
