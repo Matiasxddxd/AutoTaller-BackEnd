@@ -47,10 +47,17 @@ adminRouter.get('/dashboard', async (req, res, next) => {
     ]);
 
     res.json({
-      ordenes: ordenes.rows[0],
-      clientes: clientes.rows[0],
-      repuestos: repuestos.rows[0],
+      ordenes_por_estado: [
+        { estado: 'pendiente',  total: Number(ordenes.rows[0].pendientes) },
+        { estado: 'en_proceso', total: Number(ordenes.rows[0].en_proceso) },
+        { estado: 'terminada',  total: Number(ordenes.rows[0].terminadas) },
+        { estado: 'entregada',  total: Number(ordenes.rows[0].entregadas) },
+      ],
       ingresos: ingresos.rows[0],
+      clientes: clientes.rows[0],
+      alertas_stock_bajo: [],
+      rendimiento_mecanicos: [],
+      periodo: { mes, anio },
     });
   } catch (err) {
     next(err);
