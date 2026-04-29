@@ -74,18 +74,17 @@ quotesRouter.post('/', [
     const total  = subtotal + iva;
 
     const { rows } = await db.query(`
-      INSERT INTO cotizaciones (cliente_id, vehiculo_id, subtotal, iva, total, notas, vencimiento, creado_por)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *
-    `, [cliente_id, vehiculo_id, subtotal, iva, total, notas, vencimiento || null, req.user?.userId]);
+      INSERT INTO cotizaciones (cliente_id, vehiculo_id, iva, total, notas, vencimiento, creado_por)
+      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *
+    `, [cliente_id, vehiculo_id, iva, total, notas, vencimiento || null, req.user?.userId]);
 
     const cotizacion = rows[0];
 
     for (const item of items) {
       await db.query(`
-        INSERT INTO cotizacion_items (cotizacion_id, tipo, descripcion, cantidad, precio_unitario, subtotal)
-        VALUES ($1,$2,$3,$4,$5,$6)
-      `, [cotizacion.id, item.tipo, item.descripcion, item.cantidad, item.precio_unitario,
-          Number(item.cantidad) * Number(item.precio_unitario)]);
+        INSERT INTO cotizacion_items (cotizacion_id, tipo, descripcion, cantidad, precio_unitario)
+        VALUES ($1,$2,$3,$4,$5)
+      `, [cotizacion.id, item.tipo, item.descripcion, item.cantidad, item.precio_unitario]);
     }
 
     res.status(201).json(cotizacion);
