@@ -74,9 +74,9 @@ quotesRouter.post('/', [
     const total  = subtotal + iva;
 
     const { rows } = await db.query(`
-      INSERT INTO cotizaciones (cliente_id, vehiculo_id, iva, total, notas, vencimiento, creado_por)
-      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *
-    `, [cliente_id, vehiculo_id, iva, total, notas, vencimiento || null, req.user?.userId]);
+      INSERT INTO cotizaciones (cliente_id, vehiculo_id, subtotal, iva, total, notas, vencimiento, creado_por)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *
+    `, [cliente_id, vehiculo_id, subtotal, iva, total, notas, vencimiento || null, req.user?.userId]);
 
     const cotizacion = rows[0];
 
